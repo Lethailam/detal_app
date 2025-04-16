@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -51,6 +52,7 @@ import com.example.doctors_appointment.MyApp
 import com.example.doctors_appointment.R
 import com.example.doctors_appointment.data.model.Appointment
 import com.example.doctors_appointment.data.model.Patient
+import com.example.doctors_appointment.ui.SignIn
 import com.example.doctors_appointment.ui.patientsUI.mainHome.RoundImage
 import com.example.doctors_appointment.ui.patientsUI.mainHome.fontInria
 import com.example.doctors_appointment.ui.theme.Indigo200
@@ -59,6 +61,7 @@ import com.example.doctors_appointment.ui.theme.Indigo500
 import com.example.doctors_appointment.ui.theme.Indigo900
 import com.example.doctors_appointment.ui.patientsUI.viewmodels.OthersViewModel
 import com.example.doctors_appointment.util.ProfileEvent
+import kotlin.math.sign
 
 @Composable
 fun ProfilePage(
@@ -184,9 +187,9 @@ fun ProfilePage(
                         )
                     }
                 } else Profile(othersViewModel.user)
-                
+
                 Spacer(modifier = Modifier.height(7.dp))
-                
+
                 Text(
                     text = "Medical History:",
                     fontSize = 25.sp,
@@ -194,6 +197,25 @@ fun ProfilePage(
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )
+
+                Spacer(modifier = Modifier.height(7.dp))
+
+                // Logout Button
+                OutlinedButton(
+                    onClick = {
+                       othersViewModel.signout()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "Logout",
+                        fontSize = 20.sp,
+                        fontFamily = fontInria,
+                    )
+                }
+
 
                 Spacer(modifier = Modifier.height(7.dp))
 

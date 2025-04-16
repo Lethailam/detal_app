@@ -3,14 +3,17 @@ package com.example.doctors_appointment.ui.patientsUI.viewmodels
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.doctors_appointment.MyApp
 import com.example.doctors_appointment.data.model.Appointment
 import com.example.doctors_appointment.data.model.Doctor
 import com.example.doctors_appointment.data.model.Patient
 import com.example.doctors_appointment.data.repository.FirestoreRepository
 import com.example.doctors_appointment.util.ProfileEvent
+import com.example.doctors_appointment.util.Screen
 import com.example.doctors_appointment.util.UiEvent
 import com.google.android.gms.tasks.Tasks.await
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -19,9 +22,10 @@ import kotlinx.coroutines.launch
 
 
 class OthersViewModel(
-    private val repository: FirestoreRepository
+    private val repository: FirestoreRepository,
+    private val navController: NavController
 ) : ViewModel() {
-
+    private val auth = FirebaseAuth.getInstance()
     var doctors = mutableStateOf(emptyList<Doctor>())
     var categoryDoctors = mutableStateOf(emptyList<Doctor>())
     var doctor = Doctor()
@@ -100,12 +104,23 @@ class OthersViewModel(
         }
 
         viewModelScope.launch {
-            upcomingAppointments.value = repository.getUpcomingAppointments(user.id, isDoctor = false)
             pastAppointments.value = repository.getPastAppointments(user.id, isDoctor = false)
         }
     }
+
+    suspend fun updateUpcomingAppointments() {
+        viewModelScope.launch {
+            upcomingAppointments.value = repository.getUpcomingAppointments(user.id, isDoctor = false)
+        }
+    }
+
     suspend fun getDoctorById(id: String): Doctor? {
         return repository.getDoctorById(id)
+    }
+
+    fun signout() {
+        auth.signOut()
+        navController.navigate(Screen.signIn.route)
     }
 
 }
