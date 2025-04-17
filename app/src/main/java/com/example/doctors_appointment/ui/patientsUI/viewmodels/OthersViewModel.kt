@@ -101,10 +101,14 @@ class OthersViewModel(
     init {
         viewModelScope.launch {
             doctors.value = repository.getAllDoctors()
-        }
+//        }
 
-        viewModelScope.launch {
+//        viewModelScope.launch {
             pastAppointments.value = repository.getPastAppointments(user.id, isDoctor = false)
+//        }
+
+//        viewModelScope.launch {
+            upcomingAppointments.value = repository.getUpcomingAppointments(user.id, isDoctor = false)
         }
     }
 

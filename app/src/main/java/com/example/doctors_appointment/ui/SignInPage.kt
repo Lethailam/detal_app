@@ -2,11 +2,13 @@ package com.example.doctors_appointment.ui
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
@@ -31,11 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.doctors_appointment.R
 import com.example.doctors_appointment.ui.patientsUI.mainHome.fontActor
 import com.example.doctors_appointment.ui.patientsUI.mainHome.fontInria
 import com.example.doctors_appointment.util.Screen
@@ -82,12 +87,18 @@ fun SignIn(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
+
+        Image(painter = painterResource(id = R.drawable.a), contentDescription = "Login image",
+            modifier = Modifier.size(200.dp))
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = "Welcome to Doctor's Appointment",
             textAlign = TextAlign.Center,
             fontFamily = fontInria,
             fontSize = 28.sp,
-            fontWeight = FontWeight.Light
+            fontWeight = FontWeight.Bold
 
         )
 
@@ -100,14 +111,15 @@ fun SignIn(
             fontFamily = fontInria,
             fontSize = 13.sp,
             modifier = Modifier.alpha(0.5f),
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.Bold,
         )
         Spacer(
             modifier = Modifier.height(20.dp)
         )
 
         var filledMail by remember{
-            mutableStateOf("")
+            mutableStateOf("lamlt@gmail.com")
+            // Nhập sẵn email ở đây luôn
         }
         OutlinedTextField(
             value = filledMail ,
@@ -145,7 +157,7 @@ fun SignIn(
 
 
         var filledPass by remember {
-            mutableStateOf("")
+            mutableStateOf("lamlt123@")
         }
         OutlinedTextField(
             value = filledPass,
@@ -160,7 +172,7 @@ fun SignIn(
                     imageVector = Icons.Outlined.Password,
                     contentDescription = "Pass"
                 )
-            },
+            }, visualTransformation = PasswordVisualTransformation()
 //            textStyle = LocalTextStyle.current.copy(
 //                textAlign = TextAlign.Center
 //            )
@@ -198,7 +210,7 @@ fun SignIn(
             fontFamily = fontInria,
             fontSize = 12.sp,
             modifier = Modifier.alpha(0.5f),
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.Bold,
         )
         TextButton(
             onClick = {
@@ -213,7 +225,7 @@ fun SignIn(
                 fontFamily = fontInria,
                 fontSize = 12.sp,
                 modifier = Modifier.alpha(0.5f),
-                fontWeight = FontWeight.Light,
+                fontWeight = FontWeight.Bold,
             )
         }
     }
