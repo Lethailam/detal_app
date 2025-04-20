@@ -127,7 +127,7 @@ fun SignIn(
                 filledMail = it
             },
             label = {
-                    Text(text = "Enter Email address: ")
+                Text(text = "Enter Email address: ")
             },
             leadingIcon = {
                 Icon(
@@ -183,7 +183,7 @@ fun SignIn(
 
         Button(
             onClick = {
-                 signInViewModel.OnLoginClick(filledMail, filledPass)
+                signInViewModel.OnLoginClick(filledMail, filledPass)
             },
             modifier = Modifier
                 .height(50.dp)
@@ -192,13 +192,13 @@ fun SignIn(
                 containerColor = Indigo100,
                 contentColor = Indigo900
             )
-            ) {
+        ) {
             Text(
                 text = "Log in",
                 fontSize = 24.sp,
                 //fontWeight = FontWeight.Bold,
                 fontFamily = fontActor
-                )
+            )
         }
 
         Spacer(
@@ -220,7 +220,7 @@ fun SignIn(
                 .width(80.dp)
                 .height(40.dp)
 
-            ) {
+        ) {
             Text(text = "Sign Up",
                 fontFamily = fontInria,
                 fontSize = 12.sp,

@@ -76,7 +76,7 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         db.collection("patients").document(patientId).delete().await()
     }
 
-    override suspend fun getPatientById(patientId: String): Patient? {
+    override suspend fun getPatiezntById(patientId: String): Patient? {
         return db.collection("patients").document(patientId).get().await().toObject(Patient::class.java)
     }
 
@@ -147,6 +147,13 @@ object FirestoreRepositoryImpl : FirestoreRepository {
 
     override suspend fun setAppointment(doctorId: String, patientId: String, appointment: Appointment) {
         insertAppointment(appointment.copy(doctorId = doctorId, patientId = patientId))
+    }
+
+    override suspend fun updateDoctorRating(doctorId: String, newRating: Double) {
+        db.collection("doctors")
+            .document(doctorId)
+            .update("rating", newRating)
+            .await()
     }
 
 }

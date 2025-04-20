@@ -1,5 +1,6 @@
 package com.example.doctors_appointment.ui.patientsUI.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.example.doctors_appointment.util.Screen
 import com.example.doctors_appointment.util.UiEvent
 import com.google.android.gms.tasks.Tasks.await
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -51,22 +53,28 @@ class OthersViewModel(
     private val _uiEvents = Channel<UiEvent>()
     val uiEvents = _uiEvents.receiveAsFlow()
 
-    fun OnEvent(event: ProfileEvent){
-        when(event){
-            is ProfileEvent.EditEmail -> newPatient.email = event.email
-            is ProfileEvent.EditGender -> newPatient.gender = event.gender
-            is ProfileEvent.EditName -> newPatient.name = event.name
-            is ProfileEvent.EditHeight -> newPatient.height = event.height
-            is ProfileEvent.EditWeight -> newPatient.weight = event.weight
-            is ProfileEvent.EditDoT -> newPatient.dateOfBirth = event.dot
-            is ProfileEvent.EditNumber -> newPatient.contactNumber = event.contact
-            is ProfileEvent.EditNotificationStatus -> newPatient.notification = event.notificationStatus
+    fun OnEvent(event: ProfileEvent) {
+        when (event) {
+            is ProfileEvent.EditEmail -> user.email = event.email
+            is ProfileEvent.EditGender -> user.gender = event.gender
+            is ProfileEvent.EditName -> user.name = event.name
+            is ProfileEvent.EditHeight -> user.height = event.height
+            is ProfileEvent.EditWeight -> user.weight = event.weight
+            is ProfileEvent.EditDoT -> user.dateOfBirth = event.dot
+            is ProfileEvent.EditNumber -> user.contactNumber = event.contact
+            is ProfileEvent.EditNotificationStatus -> user.notification = event.notificationStatus
+//            is ProfileEvent.EditMedicalHis -> user.medicalHistory = event.medicalHis
+
             is ProfileEvent.OnSave -> {
                 viewModelScope.launch {
-                    repository.updatePatient(newPatient)
-                    user = newPatient
+                    repository.updatePatient(user)
+                    MyApp.patient = user
+//                    sendUiEvent(UiEvent.ShowSnackbar("✅ Cập nhật thành công"))
+
                 }
             }
+
+
             else -> {}
         }
     }
@@ -99,6 +107,8 @@ class OthersViewModel(
     }
 
     init {
+        observeDoctorsRealtime()
+
         viewModelScope.launch {
             doctors.value = repository.getAllDoctors()
 //        }
@@ -125,6 +135,22 @@ class OthersViewModel(
     fun signout() {
         auth.signOut()
         navController.navigate(Screen.signIn.route)
+    }
+
+    fun observeDoctorsRealtime() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("doctors")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("🔥 Firestore", "Listen failed: ${error.message}")
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val updatedDoctors = snapshot.toObjects(Doctor::class.java)
+                    doctors.value = updatedDoctors
+                }
+            }
     }
 
 }

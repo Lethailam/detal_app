@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,6 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.doctors_appointment.data.repository.FirestoreRepository
 import com.example.doctors_appointment.data.repository.FirestoreRepositoryImpl
+import com.example.doctors_appointment.ui.DoctorNavBar
 import com.example.doctors_appointment.ui.HomePage
 import com.example.doctors_appointment.ui.SignIn
 import com.example.doctors_appointment.ui.SignInViewModel
@@ -61,7 +63,7 @@ data class BottomNavigationItem(
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavBar() {
+fun NavBar(highNavController: NavHostController) {
 
     val repository: FirestoreRepository = FirestoreRepositoryImpl
 
@@ -128,6 +130,12 @@ fun NavBar() {
             composable(Screen.signIn.route){
                 SignIn(navController = navController, signInViewModel = signInViewModel)
             }
+//            composable(Screen.doctorNavBar.route){
+//                DoctorNavBar(
+//                    othersViewModel = othersViewModel,
+////                    highNavController = highNavController
+//                )
+//            }
 
             composable(Screen.doctors.route){
                 DoctorsPage(navController = navController, othersViewModel = othersViewModel)
@@ -138,7 +146,14 @@ fun NavBar() {
             }
 
             composable(Screen.profile.route){
-                ProfilePage(navController = navController, othersViewModel = othersViewModel)
+                ProfilePage(
+                    navController = navController,
+                    onSignOut = {
+                        othersViewModel.signout()
+                        highNavController.navigate(Screen.signIn.route)
+                    },
+                    othersViewModel = othersViewModel
+                )
             }
 
             composable(
@@ -150,9 +165,9 @@ fun NavBar() {
                         nullable = true
                     }
                 )
-                ){ entry ->
+            ){ entry ->
                 entry.arguments?.getString("doctorId")?.let {
-                    it1 -> DoctorsDetailsPage(navController = navController, doctorId = it1, othersViewModel)
+                        it1 -> DoctorsDetailsPage(navController = navController, doctorId = it1, othersViewModel)
                 }
             }
 
@@ -166,7 +181,7 @@ fun NavBar() {
                     }
                 )
             ){entry ->
-                 CatagoryDoctorsPage(navController = navController, category =  entry.arguments?.getString("category"), othersViewModel)
+                CatagoryDoctorsPage(navController = navController, category =  entry.arguments?.getString("category"), othersViewModel)
             }
 
             composable(
@@ -211,7 +226,7 @@ fun BottomBar(navController: NavController, items: List<BottomNavigationItem>) {
         contentColor = Indigo900,
         tonalElevation = 5.dp,
 
-    ){
+        ){
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 selected = selectedItemIndex == index,
