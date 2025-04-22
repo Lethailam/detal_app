@@ -29,6 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -62,10 +63,11 @@ import com.example.doctors_appointment.ui.theme.Indigo50
 import com.example.doctors_appointment.ui.theme.Indigo500
 import com.example.doctors_appointment.ui.theme.Indigo900
 import com.example.doctors_appointment.ui.patientsUI.viewmodels.OthersViewModel
+import com.example.doctors_appointment.ui.theme.Indigo100
 import com.example.doctors_appointment.util.ProfileEvent
 import java.util.UUID
 import kotlin.math.sign
-
+//ăsaefdsv
 @Composable
 fun ProfilePage(
     navController: NavController,
@@ -137,7 +139,6 @@ fun ProfilePage(
 
             if(onEdit){
                 OutlinedTextField(
-
                     value = filledName,
                     onValueChange = { newText ->
                         filledName = newText
@@ -149,12 +150,14 @@ fun ProfilePage(
                             fontFamily = fontInria
                         )
                     },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent, // Text color
-                        unfocusedContainerColor = Color.Transparent, // Background color
-//                        focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                        unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
+                    shape = RoundedCornerShape(14.dp), // ✅ Bo góc mềm mại
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Indigo900,         // viền đậm khi focus
+                        unfocusedBorderColor = Indigo500,       // viền đậm hơn khi không focus
+                        cursorColor = Indigo900,
+                        focusedLabelColor = Indigo900
                     ),
+                    modifier = Modifier.width(300.dp) // ✅ Chiều rộng đồng bộ
                 )
             }else{
                 Text(
@@ -191,7 +194,7 @@ fun ProfilePage(
                         )
                     }
                 } else Profile(othersViewModel.user)
-// Medical history ====
+// Medical history =======
 //                Spacer(modifier = Modifier.height(10.dp))
 //
 //                var problem by remember { mutableStateOf("") }
@@ -316,7 +319,6 @@ fun EditProfile(
             }
 
             OutlinedTextField(
-
                 value = filledHeight,
                 onValueChange = { newText ->
                     if (newText.isBlank() || newText.toDoubleOrNull() != null) {
@@ -331,12 +333,14 @@ fun EditProfile(
                         fontFamily = fontInria,
                     )
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent, // Text color
-                    unfocusedContainerColor = Color.Transparent, // Background color
-//                    focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                    unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
+                shape = RoundedCornerShape(14.dp), // ✅ bo góc đẹp
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Indigo900,     // ✅ màu viền khi focus
+                    unfocusedBorderColor = Indigo100,   // ✅ màu viền khi chưa focus
+                    cursorColor = Indigo900,
+                    focusedLabelColor = Indigo900
                 ),
+                modifier = Modifier.width(300.dp) // ✅ chiều rộng đồng bộ
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -347,7 +351,6 @@ fun EditProfile(
             }
 
             OutlinedTextField(
-
                 value = filledWeight,
                 onValueChange = { newText ->
                     if (newText.isBlank() || newText.toDoubleOrNull() != null) {
@@ -362,12 +365,14 @@ fun EditProfile(
                         fontFamily = fontInria,
                     )
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent, // Text color
-                    unfocusedContainerColor = Color.Transparent, // Background color
-//                    focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                    unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
+                shape = RoundedCornerShape(14.dp), // ✅ bo góc mềm mại
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Indigo900,     // ✅ màu viền khi focus
+                    unfocusedBorderColor = Indigo100,   // ✅ màu viền khi không focus
+                    cursorColor = Indigo900,
+                    focusedLabelColor = Indigo900
                 ),
+                modifier = Modifier.width(300.dp) // ✅ chiều rộng đồng bộ giao diện
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -383,38 +388,41 @@ fun EditProfile(
                 expanded = isExpanded,
                 onExpandedChange = { isExpanded = it }
             ) {
-
                 OutlinedTextField(
-
                     value = filledGender,
-                    onValueChange = {
-                        filledGender = it
-                    },
+                    onValueChange = { filledGender = it },
                     label = {
                         Text(
-                            text = "Gender"
+                            text = "Gender",
+                            fontFamily = fontInria
                         )
                     },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent, // Text color
-                        unfocusedContainerColor = Color.Transparent, // Background color
-//                        focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                        unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
-                    ),
+                    shape = RoundedCornerShape(14.dp), // ✅ bo góc đẹp
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
                     },
-                    modifier = Modifier.menuAnchor(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Indigo900,
+                        unfocusedBorderColor = Indigo100,
+                        cursorColor = Indigo900,
+                        focusedLabelColor = Indigo900
+                    ),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .width(300.dp) // ✅ đồng bộ chiều rộng
                 )
+
                 ExposedDropdownMenu(
                     expanded = isExpanded,
                     onDismissRequest = { isExpanded = false }
                 ) {
-
                     listOf("Male", "Female").forEach { gender ->
                         DropdownMenuItem(
                             text = {
-                                Text(text = gender, fontFamily = fontInria)
+                                Text(
+                                    text = gender,
+                                    fontFamily = fontInria
+                                )
                             },
                             onClick = {
                                 filledGender = gender
@@ -438,7 +446,6 @@ fun EditProfile(
                 mutableStateOf(patient.dateOfBirth)
             }
             OutlinedTextField(
-
                 value = filledDoB,
                 onValueChange = { newText ->
                     filledDoB = newText
@@ -452,15 +459,17 @@ fun EditProfile(
                 label = {
                     Text(
                         text = "Date of Birth",
-                        fontFamily = fontInria,
+                        fontFamily = fontInria
                     )
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent, // Text color
-                    unfocusedContainerColor = Color.Transparent, // Background color
-//                    focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                    unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
+                shape = RoundedCornerShape(14.dp), // ✅ bo góc mềm mại
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Indigo900,
+                    unfocusedBorderColor = Indigo100,
+                    cursorColor = Indigo900,
+                    focusedLabelColor = Indigo900
                 ),
+                modifier = Modifier.width(300.dp) // ✅ đồng bộ chiều rộng
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -469,11 +478,10 @@ fun EditProfile(
                 mutableStateOf(patient.contactNumber)
             }
             OutlinedTextField(
-
                 value = filledNumber,
                 onValueChange = { newText ->
                     filledNumber = newText
-                    othersViewModel.OnEvent(ProfileEvent.EditNumber(filledNumber))
+                    othersViewModel.OnEvent(ProfileEvent.EditNumber(newText))
                 },
                 label = {
                     Text(
@@ -481,12 +489,14 @@ fun EditProfile(
                         fontFamily = fontInria
                     )
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent, // Text color
-                    unfocusedContainerColor = Color.Transparent, // Background color
-//                        focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                        unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
+                shape = RoundedCornerShape(14.dp), // ✅ Bo góc mềm mại
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Indigo900,
+                    unfocusedBorderColor = Indigo100,
+                    cursorColor = Indigo900,
+                    focusedLabelColor = Indigo900
                 ),
+                modifier = Modifier.width(300.dp) // ✅ Đồng bộ chiều rộng
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -495,11 +505,10 @@ fun EditProfile(
                 mutableStateOf(patient.email)
             }
             OutlinedTextField(
-
                 value = filledMail,
                 onValueChange = { newText ->
                     filledMail = newText
-                    othersViewModel.OnEvent(ProfileEvent.EditEmail(filledMail))
+                    othersViewModel.OnEvent(ProfileEvent.EditEmail(newText))
                 },
                 label = {
                     Text(
@@ -507,12 +516,14 @@ fun EditProfile(
                         fontFamily = fontInria
                     )
                 },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent, // Text color
-                    unfocusedContainerColor = Color.Transparent, // Background color
-//                        focusedIndicatorColor = Color.Transparent, // No indicator when focused
-//                        unfocusedIndicatorColor = Color.Transparent // No indicator when not focused
+                shape = RoundedCornerShape(14.dp), // ✅ Bo góc mềm mại
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Indigo900,
+                    unfocusedBorderColor = Indigo100,
+                    cursorColor = Indigo900,
+                    focusedLabelColor = Indigo900
                 ),
+                modifier = Modifier.width(300.dp) // ✅ Đồng bộ chiều rộng
             )
 
             Spacer(modifier = Modifier.height(5.dp))

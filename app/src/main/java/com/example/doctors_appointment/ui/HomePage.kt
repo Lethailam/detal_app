@@ -27,10 +27,12 @@ import com.example.doctors_appointment.R
 import com.example.doctors_appointment.util.Screen
 import com.example.doctors_appointment.ui.theme.*
 import com.google.firebase.auth.FirebaseAuth
+import com.example.doctors_appointment.util.RequestNotificationPermission
 
 @Composable
 fun HomePage(navController: NavController){
 
+    RequestNotificationPermission()
     val auth = FirebaseAuth.getInstance()
     val fontActor = FontFamily(
         Font(R.font.actor)
