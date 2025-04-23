@@ -68,6 +68,7 @@ fun FinalBooking(
         OutlinedButton(
             onClick = {
                 bookingViewModel.onConfirm()
+                bookingViewModel.othersViewModel.refreshAppointments()
                 navController.navigate(Screen.appointment.route)
             }
         ) {

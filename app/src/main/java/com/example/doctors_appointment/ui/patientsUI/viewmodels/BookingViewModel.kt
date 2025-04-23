@@ -18,7 +18,8 @@ import java.util.Calendar
 import java.util.Date
 
 class BookingViewModel(
-    private val repository: FirestoreRepository
+    private val repository: FirestoreRepository,
+    val othersViewModel: OthersViewModel
 ) : ViewModel() {
 
 
