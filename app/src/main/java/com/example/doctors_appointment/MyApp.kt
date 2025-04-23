@@ -20,7 +20,7 @@ class MyApp : Application() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
         // Khởi tạo biến patient tại đây
-        
+
         patient = Patient()
         doctor = Doctor()
     }

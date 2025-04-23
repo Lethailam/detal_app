@@ -1,5 +1,6 @@
 package com.example.doctors_appointment.data.model
 
+import com.google.firebase.firestore.Blob
 import io.realm.kotlin.ext.realmListOf
 import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmList
@@ -22,5 +23,5 @@ data class Patient(
     var gender: Boolean? = null, // true = nam, false = nữ
     var dateOfBirth: String = "", // dạng yyyy-MM-dd hoặc timestamp nếu cần
     var medicalHistory: List<Appointment> = emptyList(),
-    var profileImage: String = ""
+    var profileImage: Blob = Blob.fromBytes(byteArrayOf())
 )
