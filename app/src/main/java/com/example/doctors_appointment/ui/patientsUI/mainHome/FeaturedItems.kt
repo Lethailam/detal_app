@@ -46,24 +46,24 @@ fun FeaturedItems() {
     val featuredItems = listOf(
 
         Featured(
-            name = "Azizul Baten",
-            motivation = "A senior heart Specialist. Care your Heart with the best doctor in the town",
-            image = painterResource(id = R.drawable.senior_doctor)
+            name = "Mạnh Toản",
+            motivation = "Certificate of Bone Grafting and Sinus Lift Institute of Dentistry and Maxillofacial Training",
+            image = painterResource(id = R.drawable.bs1_doctor)
         ),
         Featured(
-            name = "Shoishob Rahman",
-            motivation = "A potol Specialist. Potol is so neutricious. It is good for health",
-            image = painterResource(id = R.drawable.feature_doctor)
+            name = "Như Dũng",
+            motivation = "Areas of expertise: Restoration – Minor Surgery. It is good for health",
+            image = painterResource(id = R.drawable.bs2_doctor)
         ),
         Featured(
-            name = "Razia Sultana",
-            motivation = "An experienced gynocolgist. Care mothers and their child. They makes the future of the world",
+            name = "Vân Anh",
+            motivation = "Doctor with over 15 years of experience specializing in orthodontics. They makes the future of the world",
             image = painterResource(id = R.drawable.female_doctor)
         ),
         Featured(
-            name = "Salina Zaman",
-            motivation = "A child Specialist. foitrotg rojoihbgorgjoigoj",
-            image = painterResource(id = R.drawable.salina_zaman)
+            name = "Đình Giang",
+            motivation = "Graduated from the minimally invasive Full Mouth Implant class organized by Straumman Switzerland",
+            image = painterResource(id = R.drawable.bs3_doctor)
         )
     )
 

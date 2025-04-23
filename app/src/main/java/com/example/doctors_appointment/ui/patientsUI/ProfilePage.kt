@@ -294,6 +294,10 @@ fun ProfilePage(
                         onClick = {
                             othersViewModel.OnEvent(ProfileEvent.OnSave)
                             onEdit = !onEdit
+                            // Force reload the profile page
+                            othersViewModel.fetchProfileImageAsBitmap { bitmap ->
+                                bitmapState.value = bitmap
+                            }
                         }
                     ) {
                         Text(
@@ -311,7 +315,7 @@ fun ProfilePage(
                     },
                     modifier = Modifier
 //                        .fillMaxWidth()
-                        .width(200.dp)
+                        .width(250.dp)
                         .padding(horizontal = 10.dp)
 
                 ) {

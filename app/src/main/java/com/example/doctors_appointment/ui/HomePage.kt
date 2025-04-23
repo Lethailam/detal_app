@@ -61,9 +61,10 @@ fun HomePage(navController: NavController){
                 textAlign = TextAlign.Center
             )
             Image(
-                painter = painterResource(id = R.drawable.doctors_appointment__1_),
+                painter = painterResource(id = R.drawable.logo),
                 modifier = Modifier
-                    .height(220.dp),
+                    .height(300.dp)
+                    .width(300.dp),
 //                    .clip(RoundedCornerShape(30.dp)),
                 contentDescription = null,
             )
