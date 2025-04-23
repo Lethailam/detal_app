@@ -1,6 +1,8 @@
 package com.example.doctors_appointment.ui.patientsUI.viewmodels
 
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,6 +15,7 @@ import com.example.doctors_appointment.data.repository.FirestoreRepository
 import com.example.doctors_appointment.util.ProfileEvent
 import com.example.doctors_appointment.util.Screen
 import com.example.doctors_appointment.util.UiEvent
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.Channel
@@ -72,6 +75,37 @@ class OthersViewModel(
     private fun sendUiEvent(uiEvent: UiEvent) {
         viewModelScope.launch {
             _uiEvents.send(uiEvent)
+        }
+    }
+
+    fun updateProfileImage(imageUri: String) {
+        viewModelScope.launch {
+            try {
+                val fileUri = Uri.parse(imageUri)
+                val storageRef = com.google.firebase.storage.FirebaseStorage.getInstance().reference
+                val avatarRef = storageRef.child("avatars/${user.id}.jpg")
+
+                // Upload file lên Firebase Storage
+                val uploadTask = avatarRef.putFile(fileUri)
+                uploadTask.addOnSuccessListener {
+                    avatarRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                        val url = downloadUri.toString()
+
+                        // Cập nhật ảnh đại diện trong user
+                        user.profileImage = url
+
+                        // Cập nhật lên Firestore
+                        viewModelScope.launch {
+                            repository.updatePatient(user)
+                            MyApp.patient = user
+                        }
+                    }
+                }.addOnFailureListener { e ->
+                    Log.e("🔥 Upload error", "Upload thất bại: ${e.message}")
+                }
+            } catch (e: Exception) {
+                Log.e("🔥 Storage error", "Lỗi xử lý ảnh: ${e.message}")
+            }
         }
     }
 
@@ -168,5 +202,32 @@ class OthersViewModel(
                     doctors.value = updatedDoctors
                 }
             }
+    }
+
+
+    fun changePassword(currentPassword: String, newPassword: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        val email = this.user.email
+
+        if (user != null && email != null) {
+            val credential = EmailAuthProvider.getCredential(email, currentPassword)
+
+            user.reauthenticate(credential)
+                .addOnCompleteListener { authTask ->
+                    if (authTask.isSuccessful) {
+                        user.updatePassword(newPassword)
+                            .addOnCompleteListener { updateTask ->
+                                if (updateTask.isSuccessful) {
+                                    sendUiEvent(UiEvent.ShowToast("Đổi mật khẩu thành công"))
+                                    sendUiEvent(UiEvent.NavigateBack)
+                                } else {
+                                    sendUiEvent(UiEvent.ShowToast("Không thể đổi mật khẩu"))
+                                }
+                            }
+                    } else {
+                        sendUiEvent(UiEvent.ShowToast("Mật khẩu hiện tại không đúng"))
+                    }
+                }
+        }
     }
 }
