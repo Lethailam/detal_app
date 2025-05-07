@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -57,6 +58,7 @@ fun DoctorsPage(
 
     val doctors = othersViewModel.doctors
     var searchQuery by remember { mutableStateOf("") }
+    var minRating by remember { mutableStateOf(0f) }
 
     Box(
         modifier = Modifier
@@ -91,11 +93,37 @@ fun DoctorsPage(
                     unfocusedBorderColor = Indigo400
                 )
             )
+
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = null,
+                    tint = Indigo900,
+                )
+                Text(
+                    text = String.format("%.0f+", minRating),
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Slider(
+                    value = minRating,
+                    onValueChange = { minRating = it },
+                    valueRange = 0f..5f,
+                    steps = 9,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 5.dp, start = 5.dp, end = 5.dp, bottom = 65.dp)
             ){
-                items(doctors.value.filter { it.name.contains(searchQuery, ignoreCase = true) }){ doctor ->
+                items(doctors.value.filter { it.name.contains(searchQuery, ignoreCase = true) && it.rating >= minRating }){ doctor ->
                     DoctorsRow(doctor = doctor, navController)
                 }
             }

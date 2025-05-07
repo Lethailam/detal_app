@@ -25,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 class OthersViewModel(
     private val repository: FirestoreRepository,
@@ -217,6 +218,34 @@ class OthersViewModel(
     fun deleteAppointment(appointment: Appointment) {
         viewModelScope.launch {
             try {
+                val doctor = repository.getDoctorById(appointment.doctorId)
+                if (doctor != null) {
+                    // Get slot number from appointment time
+                    val calendar = Calendar.getInstance()
+                    calendar.timeInMillis = appointment.appointmentDate!!
+                    val hour = calendar.get(Calendar.HOUR_OF_DAY)
+                    val minute = calendar.get(Calendar.MINUTE)
+                    val time = hour + minute/100.0
+
+                    // Map time back to slot number
+                    val slotTime = mapOf(
+                        10.00 to 0, 10.10 to 1, 10.20 to 2, 10.30 to 3, 10.40 to 4, 10.50 to 5,
+                        11.00 to 6, 11.10 to 7, 11.20 to 8, 11.30 to 9, 11.40 to 10, 11.50 to 11,
+                        12.00 to 12, 12.10 to 13, 12.20 to 14, 12.30 to 15, 12.40 to 16, 12.50 to 17,
+                        14.00 to 18, 14.10 to 19, 14.20 to 20, 14.30 to 21, 14.40 to 22, 14.50 to 23,
+                        15.00 to 24, 15.10 to 25, 15.20 to 26, 15.30 to 27, 15.40 to 28, 15.50 to 29,
+                        16.00 to 30, 16.10 to 31, 16.20 to 32, 16.30 to 33, 16.40 to 34, 16.50 to 35
+                    )
+
+                    val slot = slotTime[time]
+                    if (slot != null) {
+                        // Update doctor availability
+                        doctor.availabilityStatus = doctor.availabilityStatus.toMutableList().apply {
+                            set(slot, true)
+                        }
+                        repository.updateDoctor(doctor)
+                    }
+                }
                 repository.deleteAppointment(appointment)
                 refreshAppointments()
             } catch (e: Exception) {

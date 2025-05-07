@@ -10,6 +10,7 @@ import com.example.doctors_appointment.data.repository.FirestoreRepository
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -41,10 +42,22 @@ class BookingViewModel(
 //        }
 //    }
 
-    fun setDateTime(slotNo: Int): Appointment{
+    fun setDateTime(slotNo: Int): Appointment {
+        val selectedDate = SimpleDateFormat("yyyy-MM-dd").format(selectedDate.value)
 
         appointment.apply {
             appointment.appointmentDate = getAppointmentTime(slotNo)
+        }
+
+        // Update booked slots for the selected date
+        val currentBookedSlots = doctor1.bookedSlotsByDate[selectedDate]?.toMutableList() ?: mutableListOf()
+        currentBookedSlots.add(slotNo)
+
+        doctor1.bookedSlotsByDate = doctor1.bookedSlotsByDate + (selectedDate to currentBookedSlots)
+
+        // Update doctor in Firestore
+        viewModelScope.launch {
+            repository.updateDoctor(doctor1)
         }
 
         return appointment

@@ -29,5 +29,6 @@ data class Doctor(
     var consultationFee: Double = 0.0,
     var experience: Int = 0,
     var docoument: List<String> = emptyList(),
-    var appointments: List<Appointment> = emptyList()
+    var appointments: List<Appointment> = emptyList(),
+    var bookedSlotsByDate: Map<String, List<Int>> = mapOf()
 )

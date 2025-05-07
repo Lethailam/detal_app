@@ -115,9 +115,7 @@ fun BookSchedule(
                 fontWeight = FontWeight.ExtraBold
             )
 
-//        val diffInMillis = selectedDateAdjusted.time - currentDate
-//        val diffInDays = TimeUnit.MILLISECONDS.toDays(diffInMillis).toInt()
-//        val selectedTabIndex = diffInDays.coerceAtLeast(0)
+
             val selectedTabIndex = 3
 
 
@@ -355,25 +353,34 @@ fun Slot(
     doctor: Doctor,
     selectedSlot: Int,
     bookingViewModel: BookingViewModel,
-    onSlotSelect: (Int) -> Unit     // Callback to notify parent when a slot is selected
+    onSlotSelect: (Int) -> Unit
 ) {
+    val selectedDate = SimpleDateFormat("yyyy-MM-dd").format(bookingViewModel.selectedDate.value)
+    val isBooked = doctor.bookedSlotsByDate[selectedDate]?.contains(slotNo) == true
+
     Button(
         onClick = {
-            if (doctor.availabilityStatus[slotNo]) {
-                onSlotSelect(slotNo) // Notify parent about the selection
+            if (doctor.availabilityStatus[slotNo] && !isBooked) {
+                onSlotSelect(slotNo)
             }
         },
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (slotNo == selectedSlot) Indigo400 else Color.White,
-            contentColor = if (doctor.availabilityStatus[slotNo]) {
-                if (selectedSlot == slotNo) Color.White else Indigo900
-            } else Color.LightGray,
-        )
+            containerColor = when {
+                isBooked -> Color.Gray
+                slotNo == selectedSlot -> Indigo400
+                else -> Color.White
+            },
+            contentColor = when {
+                isBooked -> Color.White
+                doctor.availabilityStatus[slotNo] -> if (selectedSlot == slotNo) Color.White else Indigo900
+                else -> Color.LightGray
+            }
+        ),
+        enabled = !isBooked
     ) {
-        val time= bookingViewModel.getTime(slotNo%36);
-
+        val time = bookingViewModel.getTime(slotNo%36)
         Text(
-            text =String.format("%.2f",time)
+            text = String.format("%.2f",time)
         )
     }
 }
