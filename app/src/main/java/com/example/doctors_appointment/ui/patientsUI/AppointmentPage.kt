@@ -31,7 +31,6 @@ import com.example.doctors_appointment.ui.theme.Indigo500
 import com.example.doctors_appointment.ui.theme.Indigo900
 import com.example.doctors_appointment.ui.patientsUI.viewmodels.OthersViewModel
 import kotlinx.coroutines.launch
-import android.util.Log // Added import for Log
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -120,11 +119,7 @@ fun AppointmentPage(
                             IconButton(
                                 onClick = {
                                     scope.launch {
-                                        try {
-                                            othersViewModel.deleteAppointment(appointment)
-                                        } catch (e: Exception) {
-                                            Log.e("DELETE", "Error deleting appointment: ${e.message}")
-                                        }
+                                        othersViewModel.deleteAppointment(appointment)
                                     }
                                 },
                                 modifier = Modifier.padding(bottom = 4.dp)
