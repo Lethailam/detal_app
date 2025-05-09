@@ -103,14 +103,49 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         val docRef = if (appointment.id.isNotEmpty()) {
             db.collection("appointments").document(appointment.id)
         } else {
-            // Tạo mới ID nếu chưa có, đồng thời gán lại vào appointment
             val newDocRef = db.collection("appointments").document()
             appointment.id = newDocRef.id
             newDocRef
         }
 
-        docRef.set(appointment).await()
+        // ✅ Format readable date
+        val formattedDate = appointment.appointmentDate?.let {
+            java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+                .format(java.util.Date(it))
+        } ?: "N/A"
+
+        // ✅ Lấy tên bác sĩ
+        val doctorName = appointment.doctorId?.let { id ->
+            db.collection("doctors").document(id).get().await()
+                .getString("name")
+        } ?: "Unknown Doctor"
+
+        // ✅ Lấy tên bệnh nhân
+        val patientName = appointment.patientId?.let { id ->
+            db.collection("patients").document(id).get().await()
+                .getString("name")
+        } ?: "Unknown Patient"
+
+        // ✅ Tạo dữ liệu lưu Firestore
+        val data = mutableMapOf<String, Any?>(
+            "id" to appointment.id,
+            "doctorId" to appointment.doctorId,
+            "doctorName" to doctorName,
+            "patientId" to appointment.patientId,
+            "patientName" to patientName,
+            "appointmentDate" to appointment.appointmentDate,
+            "appointmentDateString" to formattedDate,
+            "notes" to appointment.notes,
+            "prescription" to appointment.prescription,
+            "status" to appointment.status,
+            "review" to appointment.review,
+            "rating" to appointment.rating
+        )
+
+        docRef.set(data).await()
     }
+
+
     override suspend fun updateAppointment(appointment: Appointment) {
         if (appointment.id.isNotEmpty()) {
             try {
@@ -196,11 +231,15 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         insertAppointment(appointment.copy(doctorId = doctorId, patientId = patientId))
     }
 
+
+
     override suspend fun updateDoctorRating(doctorId: String, newRating: Double) {
         db.collection("doctors")
             .document(doctorId)
             .update("rating", newRating)
             .await()
     }
+
+
 
 }
