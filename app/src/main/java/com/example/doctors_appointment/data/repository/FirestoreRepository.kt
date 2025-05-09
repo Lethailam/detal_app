@@ -41,3 +41,11 @@ interface FirestoreRepository{
     suspend fun setAppointment(doctorId: String, patientId: String, appointment: Appointment)
 
 }
+
+
+
+
+
+
+
+//fun getCategoryDoctor(category: String): Flow<List<Doctor>>
