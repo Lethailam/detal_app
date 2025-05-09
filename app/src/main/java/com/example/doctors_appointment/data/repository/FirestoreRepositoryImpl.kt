@@ -168,6 +168,21 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         }
     }
 
+    override suspend fun isAppointmentSlotTaken(doctorId: String, appointmentDate: Long): Boolean {
+        return try {
+            val snapshot = db.collection("appointments")
+                .whereEqualTo("doctorId", doctorId)
+                .whereEqualTo("appointmentDate", appointmentDate)
+                .get()
+                .await()
+
+            !snapshot.isEmpty  // true nếu đã có lịch => bị trùng
+        } catch (e: Exception) {
+            Log.e("FIRESTORE", "❌ Error checking slot: ${e.message}")
+            false // giả định là không trùng nếu lỗi xảy ra, bạn có thể xử lý khác
+        }
+    }
+
     override suspend fun getPastAppointments(userId: String, isDoctor: Boolean): List<Appointment> {
         val field = if (isDoctor) "doctorId" else "patientId"
         val now = System.currentTimeMillis()

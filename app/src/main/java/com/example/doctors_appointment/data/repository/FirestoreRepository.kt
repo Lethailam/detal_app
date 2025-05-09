@@ -31,6 +31,7 @@ interface FirestoreRepository{
     suspend fun getAppointmentById(appointmentId: String): Appointment?
     suspend fun getUpcomingAppointments(userId: String, isDoctor: Boolean): List<Appointment>
     suspend fun getPastAppointments(userId: String, isDoctor: Boolean): List<Appointment>
+    suspend fun isAppointmentSlotTaken(doctorId: String, appointmentDate: Long): Boolean
 //tao mot cai getAppointmentbyTime (nhan doctorid vs time) tra ve list appointment
     // tu list appointment lay từng item trong list ta co được appointment đơn
     //từng appointment cs được patient id
@@ -41,11 +42,3 @@ interface FirestoreRepository{
     suspend fun setAppointment(doctorId: String, patientId: String, appointment: Appointment)
 
 }
-
-
-
-
-
-
-
-//fun getCategoryDoctor(category: String): Flow<List<Doctor>>
