@@ -1,11 +1,13 @@
 package com.example.doctors_appointment.ui.DoctorUI
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.doctors_appointment.MyApp
+import com.example.doctors_appointment.data.model.Appointment
 import com.example.doctors_appointment.data.model.Doctor
 import com.example.doctors_appointment.data.model.Patient
 import com.example.doctors_appointment.data.repository.FirestoreRepository
@@ -20,6 +22,7 @@ import io.realm.kotlin.types.RealmList
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import java.util.Date
 
 class DoctorViewModel(
@@ -28,20 +31,12 @@ class DoctorViewModel(
 ) : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
 
+    var appointment = Appointment()
+    var slotSelected = -1
+    val bookedSlots = mutableStateOf<List<Long>>(emptyList())
     var user = MyApp.doctor
     var selectedDate = mutableStateOf(Date())
-    val defaultPatient = Patient().apply {
-        name = "John Doe"
-        email = "john.doe@example.com"
-        password = "password123"
-        contactNumber = "1234567890" // Example contact number
-        notification = true // Example notification setting
-        height = 175.5 // Example height in centimeters
-        weight = 70.0 // Example weight in kilograms
-        gender = true // Example gender (true for male, false for female)
-        dateOfBirth = "1990-01-01" // Example date of birth in yyyy-MM-dd format
-        profileImage = Blob.fromBytes(byteArrayOf()) // Example path to profile image
-    }
+    var patientSelected = Patient()
     var patientList = mutableStateOf<List<Patient>>(listOf())
 
     var newDoctor = Doctor().apply {
@@ -131,6 +126,14 @@ class DoctorViewModel(
         }
     }
 
+    fun getPatient(patientId: String){
+        viewModelScope.launch {
+            Log.e("loi gi noi mau", "$patientId")
+            val result = repository.getPatientById(patientId)
+            patientSelected = result?: Patient()
+        }
+    }
+
     init {
 //        val userId = auth.currentUser?.uid?:""
 //        loadPatientById(userId)
@@ -167,6 +170,69 @@ class DoctorViewModel(
         viewModelScope.launch {   // this binds the lifecycle of coroutine with our viewmodel
             _uiEvents.send(uiEvent)
         }
+    }
+
+    fun getAppointment(){
+        viewModelScope.launch {
+            val date = getAppointmentTime(slotSelected)
+            appointment = repository.getAppointmentDoctorIdandDate(user.id, date)?: Appointment()
+            Log.e("log appointment","$date")
+            getPatient(appointment.patientId)
+        }
+    }
+
+
+    fun fetchBookedSlotsForDoctor(doctorId: String, date: Date) {
+        viewModelScope.launch {
+            val calendar = Calendar.getInstance().apply {
+                time = date
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            val baseDateMillis = calendar.timeInMillis
+
+            // Kiểm tra tất cả 36 slot trong ngày
+            val slots = (0..35).map { slot ->
+                val time = getTime(slot)
+                val hour = time.toInt()
+                val minute = ((time - hour) * 100).toInt()
+
+                calendar.set(Calendar.HOUR_OF_DAY, hour)
+                calendar.set(Calendar.MINUTE, minute)
+                calendar.set(Calendar.SECOND, 0)
+                calendar.set(Calendar.MILLISECOND, 0)
+
+                calendar.timeInMillis
+            }
+
+            // Lấy các appointment bị trùng
+            val taken = mutableListOf<Long>()
+            for (time in slots) {
+                if (repository.isAppointmentSlotTaken(doctorId, time)) {
+                    taken.add(time)
+                }
+            }
+            bookedSlots.value = taken
+        }
+    }
+
+    fun getAppointmentTime(slotNo: Int): Long {
+        val time = getTime(slotNo % 36)
+        val hour = time.toInt()
+        val minute = ((time - hour) * 100).toInt()
+
+        val calendar = Calendar.getInstance()
+        calendar.time = selectedDate.value
+        calendar.set(Calendar.HOUR_OF_DAY, hour)
+        calendar.set(Calendar.MINUTE, minute)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        slotSelected = slotNo
+
+        return calendar.timeInMillis
     }
 
     fun getTime(slot: Int): Double {

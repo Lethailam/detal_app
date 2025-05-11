@@ -99,6 +99,14 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         return snapshot.documents.firstOrNull()?.toObject(Patient::class.java)
     }
 
+    override suspend fun getAppointmentDoctorIdandDate(doctorId: String, date: Long): Appointment? {
+        val snapshot = db.collection("appointments")
+            .whereEqualTo("doctorId", doctorId)
+            .whereEqualTo("appointmentDate", date)
+            .get().await()
+        return snapshot.documents.firstOrNull()?.toObject(Appointment::class.java)
+    }
+
     override suspend fun insertAppointment(appointment: Appointment) {
         val docRef = if (appointment.id.isNotEmpty()) {
             db.collection("appointments").document(appointment.id)
@@ -176,6 +184,19 @@ object FirestoreRepositoryImpl : FirestoreRepository {
 
     override suspend fun getAppointmentById(appointmentId: String): Appointment? {
         return db.collection("appointments").document(appointmentId).get().await().toObject(Appointment::class.java)
+    }
+
+    override suspend fun getAppointmentsByDoctorId(doctorId: String): List<Appointment> {
+        return try {
+            val snapshot = db.collection("appointments")
+                .whereEqualTo("doctorId", doctorId)
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { it.toObject(Appointment::class.java) }
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     override suspend fun getUpcomingAppointments(userId: String, isDoctor: Boolean): List<Appointment> {
