@@ -1,7 +1,9 @@
 package com.example.doctors_appointment.ui.booking
 
 import android.content.Context
+import android.util.Log
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,6 +56,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import androidx.compose.foundation.layout.Spacer as Spacer
+import androidx.compose.runtime.LaunchedEffect
 
 
 @Composable
@@ -61,11 +64,16 @@ fun DoctorSchedule(
     navController: NavController,
     doctorViewModel: DoctorViewModel,
 ) {
+    val context = LocalContext.current // Get the context for Toast
 
-    doctorViewModel.fetchBookedSlotsForDoctor(
-        doctorId = doctorViewModel.user.id,
-        date = doctorViewModel.selectedDate.value
-    )
+    LaunchedEffect(doctorViewModel.selectedDate.value) {
+        doctorViewModel.resetSlotSelection()
+        Log.d("DoctorSchedule", "Fetching booked slots for date: ${doctorViewModel.selectedDate.value}")
+        doctorViewModel.fetchBookedSlotsForDoctor(
+            doctorId = doctorViewModel.user.id,
+            date = doctorViewModel.selectedDate.value
+        )
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -75,12 +83,8 @@ fun DoctorSchedule(
             .padding(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item{
-
-
+        item {
             Spacer(modifier = Modifier.size(10.dp))
-
-
 
             Text(
                 text = "SCHEDULE APPOINTMENT",
@@ -96,27 +100,8 @@ fun DoctorSchedule(
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
             val newselectedDate = dateFormat.format(doctorViewModel.selectedDate.value)
 
-
-
-
-            val selectedDate = doctorViewModel.selectedDate.value
-
             showDatePick(context = LocalContext.current, doctorViewModel)
 
-            val currentDate = Calendar.getInstance().apply {
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.time
-
-            val selectedDateAdjusted = Calendar.getInstance().apply {
-                time = selectedDate
-                set(Calendar.HOUR_OF_DAY, 0)
-                set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0)
-                set(Calendar.MILLISECOND, 0)
-            }.time
             Spacer(modifier = Modifier.size(16.dp))
 
             Text(
@@ -126,13 +111,14 @@ fun DoctorSchedule(
                 fontWeight = FontWeight.ExtraBold
             )
 
-
             Spacer(modifier = Modifier.height(20.dp))
 
-            val selectedTabIndex=0
+            var localSelectedSlot by remember(doctorViewModel.selectedDate.value) { mutableIntStateOf(doctorViewModel.slotSelected) }
 
-            var selectedSlot by remember {
-                mutableIntStateOf(-1)
+            LaunchedEffect(localSelectedSlot) {
+                if (localSelectedSlot != -1) {
+                    doctorViewModel.getAppointment()
+                }
             }
 
             Text(
@@ -144,98 +130,30 @@ fun DoctorSchedule(
             )
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 0..2) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
+            // Morning slots (0..17)
+            for (row in 0 until 6) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    for (i in (row * 3)..(row * 3 + 2)) {
+                        if (i <= 17) {
+                            Log.d("DoctorSchedule", "Rendering slot: $i")
+                            Slot(i, doctorViewModel.user, localSelectedSlot, doctorViewModel) { slot, isBooked ->
+                                localSelectedSlot = slot
+                                doctorViewModel.selectSlot(slot, "onSlotSelect")
+                                Log.d("DoctorSchedule", "Selected slot in callback: $slot, IsBooked: $isBooked")
+                                if (isBooked) {
+                                    navController.navigate(Screen.doctorAppointmentDetails.route)
+                                } else {
+                                    Toast.makeText(context, "Chưa có bệnh nhân nào đặt", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                for (i in 3..5) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                for (i in 6..8) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                for (i in 9..11) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                for (i in 12..14) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
-            ) {
-                for (i in 15..17) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
 
             Text(
                 text = "Evening Slots:",
@@ -246,100 +164,31 @@ fun DoctorSchedule(
             )
             Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 18..20) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
+            // Evening slots (18..35)
+            for (row in 0 until 6) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    for (i in (18 + row * 3)..(18 + row * 3 + 2)) {
+                        if (i <= 35) {
+                            Log.d("DoctorSchedule", "Rendering slot: $i")
+                            Slot(i, doctorViewModel.user, localSelectedSlot, doctorViewModel) { slot, isBooked ->
+                                localSelectedSlot = slot
+                                doctorViewModel.selectSlot(slot, "onSlotSelect")
+                                Log.d("DoctorSchedule", "Selected slot in callback: $slot, IsBooked: $isBooked")
+                                if (isBooked) {
+                                    navController.navigate(Screen.doctorAppointmentDetails.route)
+                                } else {
+                                    Toast.makeText(context, "Chưa có bệnh nhân nào đặt", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
                     }
                 }
+                Spacer(modifier = Modifier.height(10.dp))
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 21..23) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 24..26) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 27..29) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 30..32) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                for (i in 33..35) {
-                    Slot(36 * (selectedTabIndex) + i, doctor, selectedSlot, doctorViewModel) {
-                        selectedSlot = it
-                        navController.navigate(Screen.doctorAppointmentDetails.route)
-
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-
         }
-
-
-
     }
 }
 
@@ -349,26 +198,29 @@ fun Slot(
     doctor: Doctor,
     selectedSlot: Int,
     doctorViewModel: DoctorViewModel,
-    onSlotSelect: (Int) -> Unit
+    onSlotSelect: (Int, Boolean) -> Unit
 ) {
     val appointmentTime = doctorViewModel.getAppointmentTime(slotNo % 36)
     val isBooked = doctorViewModel.bookedSlots.value.contains(appointmentTime)
 
     Button(
         onClick = {
-            if (doctor.availabilityStatus[slotNo] && isBooked) {
-                onSlotSelect(slotNo)
+            if (doctor.availabilityStatus[slotNo]) {
+                Log.d("Slot", "Clicked slot: $slotNo")
+                doctorViewModel.selectSlot(slotNo, "onClick")
+                onSlotSelect(slotNo, isBooked)
+                Log.d("SlotSelection", "Selected slot: $slotNo, Time: $appointmentTime, IsBooked: $isBooked")
             }
         },
-        enabled = doctor.availabilityStatus[slotNo] && isBooked,
+        enabled = doctor.availabilityStatus[slotNo],
         colors = ButtonDefaults.buttonColors(
             containerColor = when {
-                isBooked -> Color.Red
+                isBooked -> Indigo400
                 slotNo == selectedSlot -> Indigo400
                 else -> Color.White
             },
             contentColor = when {
-                isBooked -> Color.Black
+                isBooked -> Indigo900
                 doctor.availabilityStatus[slotNo] -> {
                     if (selectedSlot == slotNo) Color.White else Indigo900
                 }
@@ -378,11 +230,10 @@ fun Slot(
     ) {
         val time = doctorViewModel.getTime(slotNo % 36)
         Text(
-            text = String.format("%.2f", time)
+            text = String.format("%.2f", time).replace(".", ":")
         )
     }
 }
-
 
 
 @Composable
@@ -392,19 +243,26 @@ fun showDatePick(context: Context, doctorViewModel: DoctorViewModel) {
     val month = calendar.get(Calendar.MONTH)
     val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-    val selectedDate = remember { mutableStateOf(Date()) }
     val datePickerDialog = android.app.DatePickerDialog(
         context,
-        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            val selectedCalendar = Calendar.getInstance()
-            selectedCalendar.set(year, month, dayOfMonth)
-            selectedDate.value = selectedCalendar.time
-        }, year, month, day
+        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+            val selectedCalendar = Calendar.getInstance().apply {
+                set(Calendar.YEAR, selectedYear)
+                set(Calendar.MONTH, selectedMonth)
+                set(Calendar.DAY_OF_MONTH, selectedDay)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            // ✅ Chỉ cập nhật ViewModel — phần còn lại LaunchedEffect lo
+            doctorViewModel.selectedDate.value = selectedCalendar.time
+        },
+        year, month, day
     )
 
     Button(onClick = { datePickerDialog.show() }) {
         Text(text = "Open Date Picker")
     }
-
-    doctorViewModel.selectedDate =  selectedDate
 }

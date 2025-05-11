@@ -89,7 +89,21 @@ object FirestoreRepositoryImpl : FirestoreRepository {
     }
 
     override suspend fun getPatientById(patientId: String): Patient? {
-        return db.collection("patients").document(patientId).get().await().toObject(Patient::class.java)
+        return try {
+            if (patientId.isEmpty()) {
+                Log.w("Firestore", "Empty patientId, returning null")
+                return null
+            }
+            Log.d("FirestoreQuery", "Querying patient with ID: $patientId")
+            val document = db.collection("patients")
+                .document(patientId) // Ensure a valid document ID is provided
+                .get()
+                .await()
+            document.toObject(Patient::class.java)
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error getting patient: ${e.message}", e)
+            null
+        }
     }
 
     override suspend fun auThenticateUserAsPatient(id: String): Patient? {
@@ -99,13 +113,44 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         return snapshot.documents.firstOrNull()?.toObject(Patient::class.java)
     }
 
-    override suspend fun getAppointmentDoctorIdandDate(doctorId: String, date: Long): Appointment? {
-        val snapshot = db.collection("appointments")
-            .whereEqualTo("doctorId", doctorId)
-            .whereEqualTo("appointmentDate", date)
-            .get().await()
-        return snapshot.documents.firstOrNull()?.toObject(Appointment::class.java)
+//    override suspend fun getAppointmentDoctorIdandDate(doctorId: String, date: Long): Appointment? {
+//        return try {
+//            Log.d("Firestore Query", "Searching for appointment with doctorId: $doctorId and date: $date")
+//            val snapshot = db.collection("appointments")
+//                .whereEqualTo("doctorId", doctorId)
+//                .whereEqualTo("appointmentDate", date)
+//                .get()
+//                .await()
+//            Log.d("Firestore Result", "Found ${snapshot.size()} appointments")
+//            return snapshot.documents.firstOrNull()?.toObject(Appointment::class.java)
+//        } catch (e: Exception) {
+//            Log.e("Firestore", "Error getting appointment: ${e.message}")
+//            return null
+//        }
+//    }
+
+    override suspend fun getAppointmentDoctorIdandDate(doctorId: String, appointmentDate: Long): Appointment? {
+        return try {
+            Log.d("FirestoreQuery", "Querying for doctorId: $doctorId, date: $appointmentDate")
+            val snapshot = db.collection("appointments")
+                .whereEqualTo("doctorId", doctorId)
+                .whereEqualTo("appointmentDate", appointmentDate)
+                .get()
+                .await()
+
+            val appointment = snapshot.documents.firstOrNull()?.toObject(Appointment::class.java)
+            if (appointment == null) {
+                Log.e("Firestore", "No appointment found for doctorId: $doctorId, date: $appointmentDate")
+            } else {
+                Log.d("Firestore", "Found appointment: ${appointment.id}, date: ${appointment.appointmentDate}")
+            }
+            appointment
+        } catch (e: Exception) {
+            Log.e("Firestore", "Error getting appointment: ${e.message}", e)
+            null
+        }
     }
+
 
     override suspend fun insertAppointment(appointment: Appointment) {
         val docRef = if (appointment.id.isNotEmpty()) {
@@ -224,18 +269,35 @@ object FirestoreRepositoryImpl : FirestoreRepository {
         }
     }
 
+//    override suspend fun isAppointmentSlotTaken(doctorId: String, appointmentDate: Long): Boolean {
+//        return try {
+//            val snapshot = db.collection("appointments")
+//                .whereEqualTo("doctorId", doctorId)
+//                .whereEqualTo("appointmentDate", appointmentDate)
+//                .get()
+//                .await()
+//
+//            !snapshot.isEmpty  // true nếu đã có lịch => bị trùng
+//        } catch (e: Exception) {
+//            Log.e("FIRESTORE", "❌ Error checking slot: ${e.message}")
+//            false // giả định là không trùng nếu lỗi xảy ra, bạn có thể xử lý khác
+//        }
+//    }
+
+
+
     override suspend fun isAppointmentSlotTaken(doctorId: String, appointmentDate: Long): Boolean {
         return try {
             val snapshot = db.collection("appointments")
                 .whereEqualTo("doctorId", doctorId)
-                .whereEqualTo("appointmentDate", appointmentDate)
+                .whereGreaterThanOrEqualTo("appointmentDate", appointmentDate - 300000) // -5 minutes
+                .whereLessThanOrEqualTo("appointmentDate", appointmentDate + 300000)    // +5 minutes
                 .get()
                 .await()
-
-            !snapshot.isEmpty  // true nếu đã có lịch => bị trùng
+            !snapshot.isEmpty
         } catch (e: Exception) {
             Log.e("FIRESTORE", "❌ Error checking slot: ${e.message}")
-            false // giả định là không trùng nếu lỗi xảy ra, bạn có thể xử lý khác
+            false
         }
     }
 
