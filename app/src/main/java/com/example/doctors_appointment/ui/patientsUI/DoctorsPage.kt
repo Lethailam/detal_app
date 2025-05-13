@@ -22,6 +22,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -82,7 +84,7 @@ fun DoctorsPage(
                 onValueChange = { searchQuery = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 placeholder = { Text("Search doctors...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
                 shape = RoundedCornerShape(14.dp),
@@ -91,11 +93,36 @@ fun DoctorsPage(
                     unfocusedBorderColor = Indigo400
                 )
             )
+
+            var minRating by remember { mutableStateOf(0f) }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = "Minimum Rating: ${String.format("%.0f", minRating)}",
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = Indigo900
+                )
+                Slider(
+                    value = minRating,
+                    onValueChange = { minRating = it },
+                    valueRange = 1f..5f,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Indigo500,
+                        activeTrackColor = Indigo400
+                    )
+                )
+            }
             LazyColumn(
                 modifier = Modifier
                     .padding(top = 5.dp, start = 5.dp, end = 5.dp, bottom = 65.dp)
             ){
-                items(doctors.value.filter { it.name.contains(searchQuery, ignoreCase = true) }){ doctor ->
+                items(doctors.value.filter {
+                    it.name.contains(searchQuery, ignoreCase = true) &&
+                            it.rating >= minRating
+                }){ doctor ->
                     DoctorsRow(doctor = doctor, navController)
                 }
             }
